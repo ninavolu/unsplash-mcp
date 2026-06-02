@@ -1,0 +1,25 @@
+[project]
+name = "unsplash-mcp"
+version = "1.0.0"
+description = "MCP server for fetching Unsplash photos with proper attribution"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+keywords = ["mcp", "unsplash", "photos", "images", "attribution"]
+dependencies = [
+    "fastmcp>=2.2.0",
+    "httpx>=0.26.0",
+    "python-dotenv>=1.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ninavolu/unsplash-mcp"
+Repository = "https://github.com/ninavolu/unsplash-mcp"
+Documentation = "https://github.com/ninavolu/unsplash-mcp#readme"
+
+[project.scripts]
+unsplash-mcp = "server:mcp.run"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
