@@ -2,7 +2,6 @@
 name = "unsplash-mcp"
 version = "1.0.0"
 description = "MCP server for fetching Unsplash photos with proper attribution"
-readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 keywords = ["mcp", "unsplash", "photos", "images", "attribution"]
