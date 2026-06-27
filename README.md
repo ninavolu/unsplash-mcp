@@ -12,6 +12,29 @@ An MCP (Model Context Protocol) server for searching and retrieving photos from 
 
 Every photo response includes `attribution_text` and `attribution_html` — pre-built credit strings that satisfy Unsplash's attribution requirement without any URL construction on your end.
 
+## Examples
+
+**1. Search for landscape photos with a filter**
+
+```text
+search_photos(query="mountain landscape", per_page=5, orientation="landscape")
+```
+Returns up to 5 landscape-oriented photos, each with hotlinked CDN URLs and ready-to-use `attribution_text` / `attribution_html`.
+
+**2. Get a random hero image**
+
+```text
+get_random_photos(query="modern office", count=1, orientation="landscape")
+```
+Returns one random matching photo — handy for hero banners or backgrounds where you want variety rather than a specific result.
+
+**3. Track a download when a user uses a photo**
+
+```text
+track_download(photo_id="Q5dMq3cKqec")
+```
+Returns the full-resolution download URL and registers the download event with Unsplash, as their API guidelines require whenever a photo is saved or used.
+
 ## Prerequisites
 
 - Python 3.11+
@@ -42,11 +65,11 @@ fastmcp run server.py
 ### Hosted (remote connector)
 
 The server speaks Streamable HTTP, so it can be deployed once and added as a
-custom connector by URL — no local install or per-user API key. Deploy it
-(see [Deployment](#deployment)) and add the URL in Claude:
+custom connector by URL — no local install or per-user API key. The public
+instance runs at **`https://mcp.pixlib.app/mcp`**:
 
 - **Claude.ai / Claude Code** → Settings → Connectors → *Add custom connector* →
-  `https://your-deployment.example.com/mcp`
+  `https://mcp.pixlib.app/mcp`
 
 The Unsplash access key lives only on the server (set as the `UNSPLASH_ACCESS_KEY`
 environment variable); clients never see it.
@@ -133,12 +156,13 @@ configurable in `server.py`) to protect the shared Unsplash key.
 
 ## Deployment
 
-Any platform that runs Python and exposes a port works. A `Procfile` and
-`railway.json` are included for [Railway](https://railway.app):
+A `Dockerfile`, `requirements.txt`, and `railway.json` are included for
+[Railway](https://railway.app) (or any container host):
 
-1. Create a new project from this repo.
+1. Create a new project from this repo (builder: **Dockerfile**).
 2. Set the `UNSPLASH_ACCESS_KEY` environment variable.
 3. Deploy — the server listens on `$PORT` and serves MCP at `/mcp`.
+4. Point your domain (e.g. `mcp.pixlib.app`) at the deployment as a custom domain.
 
 `GET /health` returns `{"status": "ok"}` for platform health checks.
 
@@ -148,7 +172,17 @@ This server only forwards the search/query parameters you pass to the Unsplash
 API and returns the results. It does **not** read or store conversation history,
 chat content, memory, or user files, and it collects no analytics beyond
 Unsplash's own view/download tracking (required by their API guidelines). The
-Unsplash access key is held server-side and never exposed to clients.
+Unsplash access key is held server-side and never exposed to clients. The only
+transient data is an in-memory, per-IP rate-limit counter that resets hourly.
+
+Full privacy policy: **https://pixlib.app/unsplash-mcp/#privacy**
+
+## Support & Contact
+
+- **Issues / questions:** [github.com/ninavolu/unsplash-mcp/issues](https://github.com/ninavolu/unsplash-mcp/issues)
+- **Documentation:** https://pixlib.app/unsplash-mcp/
+- Not affiliated with Unsplash, Inc. Photos and the Unsplash API are provided by
+  Unsplash under the [Unsplash API Terms](https://unsplash.com/api-terms).
 
 ## License
 
