@@ -313,7 +313,7 @@ async def get_random_photos(
 
 @mcp.tool(
     title="Track Unsplash Photo Download",
-    annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False},
+    annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": True},
 )
 async def track_download(photo_id: str) -> str:
     """
