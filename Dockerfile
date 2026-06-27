@@ -11,7 +11,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the application source.
 COPY . .
 
-# FastMCP serves Streamable HTTP at /mcp on $PORT (default 8000).
-EXPOSE 8000
+# FastMCP serves Streamable HTTP at /mcp on $PORT.
+# The app binds to whatever $PORT the platform injects; EXPOSE is informational.
+EXPOSE 8080
 
 CMD ["python", "server.py"]
