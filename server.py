@@ -15,6 +15,9 @@ from typing import Optional, List, Dict, Union
 import httpx
 from dotenv import load_dotenv
 from fastmcp import FastMCP
+from fastmcp.server.dependencies import get_http_request
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 load_dotenv()
 
@@ -40,15 +43,43 @@ def _check_rate_limit(ip: str) -> None:
     _rate_store[ip] = timestamps
 
 
+def _enforce_rate_limit() -> None:
+    """Resolve the caller's IP from the HTTP request and enforce the limit.
+
+    No-op when not running under the HTTP transport (e.g. stdio/local),
+    where there is no request to rate-limit.
+    """
+    try:
+        request = get_http_request()
+    except RuntimeError:
+        return
+    client = request.headers.get("x-forwarded-for")
+    if client:
+        ip = client.split(",")[0].strip()
+    elif request.client:
+        ip = request.client.host
+    else:
+        ip = "unknown"
+    _check_rate_limit(ip)
+
+
 mcp = FastMCP(
     "Unsplash MCP Server",
     instructions=(
-        "This server provides access to Unsplash photos with built-in attribution. "
-        "Every photo response includes attribution_text and attribution_html which "
-        "must be displayed alongside the image per Unsplash API guidelines. "
-        "Call track_download when a user saves or downloads a photo at full resolution."
+        "Provides search and retrieval of Unsplash photos via the Unsplash API "
+        "(https://unsplash.com/documentation). Each photo result includes "
+        "attribution_text and attribution_html, which Unsplash's API guidelines "
+        "require to be shown alongside the image. The track_download tool records a "
+        "download event with Unsplash, which their guidelines require when a user "
+        "saves or downloads a photo at full resolution."
     ),
 )
+
+
+@mcp.custom_route("/health", methods=["GET"])
+async def health(_request: Request) -> JSONResponse:
+    """Lightweight health check for deployment platforms (Railway, etc.)."""
+    return JSONResponse({"status": "ok", "server": "unsplash-mcp"})
 
 
 @dataclass
@@ -132,6 +163,9 @@ async def search_photos(
     """
     Search for photos on Unsplash by keyword.
 
+    Calls the Unsplash GET /search/photos endpoint
+    (https://unsplash.com/documentation#search-photos). Read-only.
+
     Returns photos with full attribution data. Each photo includes
     attribution_text and attribution_html ready to embed in content.
 
@@ -149,6 +183,7 @@ async def search_photos(
         List of photos, each with urls (raw/full/regular/small/thumb),
         dimensions, dominant color, blur_hash, and attribution strings.
     """
+    _enforce_rate_limit()
     try:
         page_int = max(1, int(page))
     except (ValueError, TypeError):
@@ -206,6 +241,9 @@ async def get_random_photos(
     """
     Get random photos from Unsplash, optionally filtered by keyword.
 
+    Calls the Unsplash GET /photos/random endpoint
+    (https://unsplash.com/documentation#get-a-random-photo). Read-only.
+
     Useful for hero images, backgrounds, or when you want variety
     rather than a specific search result.
 
@@ -218,6 +256,7 @@ async def get_random_photos(
     Returns:
         List of photos with full attribution data.
     """
+    _enforce_rate_limit()
     try:
         count_int = min(max(1, int(count)), 30)
     except (ValueError, TypeError):
@@ -265,9 +304,10 @@ async def track_download(photo_id: str) -> str:
     """
     Records a photo download event with Unsplash (required by API guidelines).
 
-    Unsplash's API terms require calling this endpoint whenever a user
-    downloads or saves a photo at full resolution. Returns the direct
-    download URL for the full-resolution image.
+    Calls the Unsplash GET /photos/{id}/download endpoint
+    (https://unsplash.com/documentation#track-a-photo-download). Unsplash's API
+    terms require this whenever a user downloads or saves a photo at full
+    resolution. Returns the direct download URL for the full-resolution image.
 
     Args:
         photo_id: The photo ID from a previous search_photos or get_random_photos result
@@ -275,6 +315,7 @@ async def track_download(photo_id: str) -> str:
     Returns:
         Direct download URL for the full-resolution photo
     """
+    _enforce_rate_limit()
     if not photo_id or not photo_id.strip():
         raise ValueError("photo_id is required")
 
@@ -287,7 +328,12 @@ async def track_download(photo_id: str) -> str:
             )
             response.raise_for_status()
             data = response.json()
-            return data.get("url", "")
+            url = data.get("url")
+            if not url:
+                raise ValueError(
+                    f"Unsplash returned no download URL for photo {photo_id}."
+                )
+            return url
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 401:
             raise ValueError("Server API key is invalid. Contact the administrator.")

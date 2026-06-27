@@ -39,7 +39,19 @@ fastmcp run server.py
 
 ## Configuration
 
-### Claude (claude.ai / Claude Code)
+### Hosted (remote connector)
+
+The server speaks Streamable HTTP, so it can be deployed once and added as a
+custom connector by URL — no local install or per-user API key. Deploy it
+(see [Deployment](#deployment)) and add the URL in Claude:
+
+- **Claude.ai / Claude Code** → Settings → Connectors → *Add custom connector* →
+  `https://your-deployment.example.com/mcp`
+
+The Unsplash access key lives only on the server (set as the `UNSPLASH_ACCESS_KEY`
+environment variable); clients never see it.
+
+### Claude (claude.ai / Claude Code) — local stdio
 
 Add to `~/.claude.json` or your project's `.mcp.json`:
 
@@ -115,6 +127,28 @@ This server handles all three Unsplash API requirements automatically:
 |------|-------|
 | Demo (default) | 50 requests / hour |
 | Production (apply at unsplash.com) | 5,000 requests / hour |
+
+The hosted server also applies a per-IP cap (30 requests/hour by default,
+configurable in `server.py`) to protect the shared Unsplash key.
+
+## Deployment
+
+Any platform that runs Python and exposes a port works. A `Procfile` and
+`railway.json` are included for [Railway](https://railway.app):
+
+1. Create a new project from this repo.
+2. Set the `UNSPLASH_ACCESS_KEY` environment variable.
+3. Deploy — the server listens on `$PORT` and serves MCP at `/mcp`.
+
+`GET /health` returns `{"status": "ok"}` for platform health checks.
+
+## Privacy & Data
+
+This server only forwards the search/query parameters you pass to the Unsplash
+API and returns the results. It does **not** read or store conversation history,
+chat content, memory, or user files, and it collects no analytics beyond
+Unsplash's own view/download tracking (required by their API guidelines). The
+Unsplash access key is held server-side and never exposed to clients.
 
 ## License
 
