@@ -66,10 +66,10 @@ fastmcp run server.py
 
 The server speaks Streamable HTTP, so it can be deployed once and added as a
 custom connector by URL — no local install or per-user API key. The public
-instance runs at **`https://mcp.pixlib.app/mcp`**:
+instance runs at **`https://unsplash.pixlib.app/mcp`**:
 
 - **Claude.ai / Claude Code** → Settings → Connectors → *Add custom connector* →
-  `https://mcp.pixlib.app/mcp`
+  `https://unsplash.pixlib.app/mcp`
 
 The Unsplash access key lives only on the server (set as the `UNSPLASH_ACCESS_KEY`
 environment variable); clients never see it.
@@ -162,7 +162,7 @@ A `Dockerfile`, `requirements.txt`, and `railway.json` are included for
 1. Create a new project from this repo (builder: **Dockerfile**).
 2. Set the `UNSPLASH_ACCESS_KEY` environment variable.
 3. Deploy — the server listens on `$PORT` and serves MCP at `/mcp`.
-4. Point your domain (e.g. `mcp.pixlib.app`) at the deployment as a custom domain.
+4. Point your domain (e.g. `unsplash.pixlib.app`) at the deployment as a custom domain.
 
 `GET /health` returns `{"status": "ok"}` for platform health checks.
 
@@ -175,12 +175,12 @@ Unsplash's own view/download tracking (required by their API guidelines). The
 Unsplash access key is held server-side and never exposed to clients. The only
 transient data is an in-memory, per-IP rate-limit counter that resets hourly.
 
-Full privacy policy: **https://pixlib.app/unsplash-mcp/#privacy**
+Full privacy policy: **https://unsplash.pixlib.app/#privacy**
 
 ## Support & Contact
 
 - **Issues / questions:** [github.com/ninavolu/unsplash-mcp/issues](https://github.com/ninavolu/unsplash-mcp/issues)
-- **Documentation:** https://pixlib.app/unsplash-mcp/
+- **Documentation:** https://unsplash.pixlib.app/
 - Not affiliated with Unsplash, Inc. Photos and the Unsplash API are provided by
   Unsplash under the [Unsplash API Terms](https://unsplash.com/api-terms).
 

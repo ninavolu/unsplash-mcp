@@ -17,9 +17,11 @@ from dotenv import load_dotenv
 from fastmcp import FastMCP
 from fastmcp.server.dependencies import get_http_request
 from starlette.requests import Request
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, HTMLResponse
 
 load_dotenv()
+
+_DOCS_PATH = os.path.join(os.path.dirname(__file__), "docs", "index.html")
 
 UNSPLASH_API_BASE = "https://api.unsplash.com"
 
@@ -80,6 +82,18 @@ mcp = FastMCP(
 async def health(_request: Request) -> JSONResponse:
     """Lightweight health check for deployment platforms (Railway, etc.)."""
     return JSONResponse({"status": "ok", "server": "unsplash-mcp"})
+
+
+@mcp.custom_route("/", methods=["GET"])
+async def landing(_request: Request):
+    """Serve the public landing/docs page (which includes the privacy policy)."""
+    try:
+        with open(_DOCS_PATH, "r", encoding="utf-8") as f:
+            return HTMLResponse(f.read())
+    except OSError:
+        return JSONResponse(
+            {"server": "unsplash-mcp", "mcp_endpoint": "/mcp", "docs": "/"}
+        )
 
 
 @dataclass
