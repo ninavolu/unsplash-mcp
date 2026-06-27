@@ -40,7 +40,7 @@ Returns the full-resolution download URL and registers the download event with U
 - Python 3.11+
 - An Unsplash API access key — [register a free app at unsplash.com/developers](https://unsplash.com/developers)
 
-> **Important:** When registering your Unsplash app, set the **Application name** to `unsplash_mcp`. This must match the `utm_source` value used in the server.
+> **Important:** This server's attribution links use `utm_source=pixlib_claude_mcp`, matching the registered Unsplash application **pixlib(claude mcp)**. If you register your own Unsplash app, set `utm` in `server.py` to a slug of your app's name.
 
 ## Installation
 
@@ -129,8 +129,8 @@ Add to `~/.claude.json` or your project's `.mcp.json`:
     "blur_hash": "LKO2?U%2...",
     "photographer_name": "Jane Smith",
     "photographer_username": "janesmith",
-    "photographer_url": "https://unsplash.com/@janesmith?utm_source=unsplash_mcp&utm_medium=referral",
-    "photo_url": "https://unsplash.com/photos/abc123?utm_source=unsplash_mcp&utm_medium=referral",
+    "photographer_url": "https://unsplash.com/@janesmith?utm_source=pixlib_claude_mcp&utm_medium=referral",
+    "photo_url": "https://unsplash.com/photos/abc123?utm_source=pixlib_claude_mcp&utm_medium=referral",
     "attribution_text": "Photo by Jane Smith on Unsplash",
     "attribution_html": "Photo by <a href=\"...\">Jane Smith</a> on <a href=\"...\">Unsplash</a>"
 }

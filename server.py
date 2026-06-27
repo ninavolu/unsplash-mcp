@@ -135,7 +135,8 @@ def _photo_to_dataclass(photo: dict) -> UnsplashPhoto:
     user = photo["user"]
     photographer_name = user.get("name", user["username"])
     photographer_username = user["username"]
-    utm = "unsplash_mcp"
+    # URL-safe slug for the registered Unsplash app name "pixlib(claude mcp)".
+    utm = "pixlib_claude_mcp"
     photographer_url = f"https://unsplash.com/@{photographer_username}?utm_source={utm}&utm_medium=referral"
     photo_url = photo["links"]["html"] + f"?utm_source={utm}&utm_medium=referral"
     attribution_text = f"Photo by {photographer_name} on Unsplash"
